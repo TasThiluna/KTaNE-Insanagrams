@@ -16,13 +16,15 @@ MonoBehaviour:
   author: AAces, Blananas2
   description: 'Unscramble a module name!
 
+    This is the version currently being maintained. Please unsubscribe from the old
+    version.
+
 
     Idea: Blananas2
 
     Implementation: AAces
 
-
-    Manual: Coming Soon'
+    Maintained by: TasThing'
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 5e38889d8faeb8f42971a9b4d6366b74, type: 3}
