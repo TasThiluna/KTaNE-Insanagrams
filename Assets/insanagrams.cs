@@ -11,9 +11,9 @@ public class insanagrams : MonoBehaviour {
     public KMBombModule module;
     public KMAudio newAudio;
 
-    private static int _moduleIdCounter = 1;
-    private int _moduleId;
-    private bool _isSolved, _lightsOn;
+    private static int moduleIdCounter = 1;
+    private int moduleId;
+    private bool moduleSolved, lightsOn;
 
     public KMSelectable[] buttons;
     public KMSelectable submit, clear;
@@ -27,14 +27,15 @@ public class insanagrams : MonoBehaviour {
     private Dictionary<char, int> keys = new Dictionary<char, int>();
     private String[] moduleNames;
 
-    // Use this for initialization
-    void Start () {
-        _moduleId = _moduleIdCounter++;
+    void Start()
+	{
+        moduleId = moduleIdCounter++;
         module.OnActivate += Activate;
     }
 
-    void Activate() {
-        _lightsOn = true;
+    void Activate()
+	{
+        lightsOn = true;
         Init();
     }
 
@@ -58,7 +59,8 @@ public class insanagrams : MonoBehaviour {
         };
     }
 
-    void Init() {
+    void Init()
+	{
         SetupDict();
         int moduleCode = Random.Range(0, moduleNames.Length);
         answer = moduleNames[moduleCode];
@@ -72,12 +74,14 @@ public class insanagrams : MonoBehaviour {
         foreach (char letter in answer.ToUpper().ToCharArray()) {
             buttonObjects[keys[letter]].SetActive(true);
         }
-        Debug.LogFormat("[Insanagrams #{0}] Anagram: '{1}', Answer: '{2}'", _moduleId, anagram, answer);
+        Debug.LogFormat("[Insanagrams #{0}] Anagram: '{1}', Answer: '{2}'", moduleId, anagram, answer);
     }
 
-    void handleKeyPress(int button) {
+    void handleKeyPress(int button)
+	{
         newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, buttons[button].transform);
-        if (!_lightsOn || _isSolved) return;
+		buttons[button].AddInteractionPunch(.5f);
+        if (!lightsOn || moduleSolved) return;
         switch (button) {
             case 0://A
                 ans.text += "A";
@@ -220,35 +224,39 @@ public class insanagrams : MonoBehaviour {
             case 46://,
                 ans.text += ",";
 				break;
-
         }
     }
 
-    void handleSubmit() {
+    void handleSubmit()
+	{
         newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, submit.transform);
-        if (!_lightsOn || _isSolved) return;
-
-        if (ans.text.ToUpper().Equals(answer.ToUpper())){
+        if (!lightsOn || moduleSolved)
+			return;
+        if (ans.text.ToUpper().Equals(answer.ToUpper()))
+		{
             module.HandlePass();
-            _isSolved = true;
+            moduleSolved = true;
             newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, submit.transform);
-            Debug.LogFormat("[Insanagrams #{0}] Solved!", _moduleId);
-        } else {
+            Debug.LogFormat("[Insanagrams #{0}] Solved!", moduleId);
+        }
+		else
+		{
             module.HandleStrike();
-            Debug.LogFormat("[Insanagrams #{0}] Strike! Inputted: '{1}'. If you feel like this is an error, contact TasThing#5896 on Discord with a copy of this log file.", _moduleId, ans.text);
+            Debug.LogFormat("[Insanagrams #{0}] Strike! Inputted: '{1}'. If you feel like this is an error, contact TasThing#5896 on Discord with a copy of this log file.", moduleId, ans.text);
             ans.text = "";
         }
     }
 
-    void handleClear() {
+    void handleClear()
+	{
         newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, submit.transform);
-        if (!_lightsOn || _isSolved) return;
-        Debug.LogFormat("[Insanagrams #{0}] Clear pressed. Text cleared: '{1}'.", _moduleId, ans.text);
+        if (!lightsOn || moduleSolved) return;
+        Debug.LogFormat("[Insanagrams #{0}] Clear pressed. Text cleared: '{1}'.", moduleId, ans.text);
         ans.text = "";
     }
 
-    void SetupDict() {
-
+    void SetupDict()
+	{
         keys.Add('A',0);
         keys.Add('B',1);
         keys.Add('C',2);
@@ -796,25 +804,22 @@ public class insanagrams : MonoBehaviour {
 		modules.Add("The Crafting Table", "Fractal Beet Thing");
     }
 
-#pragma warning disable 414
+	#pragma warning disable 414
     private string TwitchHelpMessage = "Use '!{0} submit Cheap Checkout' to submit Cheap Checkout as your answer.";
-#pragma warning restore 414
+	#pragma warning restore 414
 
-    KMSelectable[] ProcessTwitchCommand(string input) {
+    KMSelectable[] ProcessTwitchCommand(string input)
+	{
 
       var match = Regex.Match(input, @"^\s*(submit|press|enter)\s+(.+)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
       if(!match.Success)
-      {
         return null;
-      }
       var text = match.Groups[2].Value.ToUpperInvariant();
-      var btns = new List <KMSelectable>();
+      var btns = new List<KMSelectable>();
       foreach (var ch in text)
       {
         if (!keys.ContainsKey(ch))
-        {
           return null;
-        }
         btns.Add(buttons[keys[ch]]);
       }
       btns.Add(submit);
