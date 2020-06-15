@@ -14,7 +14,7 @@ public class insanagrams : MonoBehaviour
 
     private static int moduleIdCounter = 1;
     private int moduleId;
-    private bool moduleSolved, lightsOn;
+    private bool moduleSolved;
 
     public KMSelectable[] buttons;
     public KMSelectable submit, clear;
@@ -28,42 +28,16 @@ public class insanagrams : MonoBehaviour
     private Dictionary<char, int> keys = new Dictionary<char, int>();
     private String[] moduleNames;
 
-    void Start()
-    {
-        moduleId = moduleIdCounter++;
-        module.OnActivate += Activate;
-    }
-
-    void Activate()
-    {
-        lightsOn = true;
-        Init();
-    }
-
     private void Awake()
     {
-        for (int i = 0; i < 47; i++)
-        {
-            var j = i;
-            buttons[i].OnInteract += delegate
-            {
-                handleKeyPress(j);
-                return false;
-            };
-        }
-        submit.OnInteract += delegate
-        {
-            handleSubmit();
-            return false;
-        };
-        clear.OnInteract += delegate
-        {
-            handleClear();
-            return false;
-        };
+        moduleId = moduleIdCounter++;
+        foreach (KMSelectable button in buttons)
+            button.OnInteract += delegate () { PressButton(button); return false; };
+        submit.OnInteract += delegate () { PressSubmit(); return false; };
+        clear.OnInteract += delegate () { PressClear(); return false; };
     }
 
-    void Init()
+    void Start()
     {
         SetupDict();
         int moduleCode = Random.Range(0, moduleNames.Length);
@@ -83,161 +57,19 @@ public class insanagrams : MonoBehaviour
         Debug.LogFormat("[Insanagrams #{0}] Anagram: '{1}', Answer: '{2}'", moduleId, anagram, answer);
     }
 
-    void handleKeyPress(int button)
+    void PressButton(KMSelectable button)
     {
-        newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, buttons[button].transform);
-        buttons[button].AddInteractionPunch(.5f);
-        if (!lightsOn || moduleSolved) return;
-        switch (button)
-        {
-            case 0://A
-                ans.text += "A";
-                break;
-            case 1://B
-                ans.text += "B";
-                break;
-            case 2://C
-                ans.text += "C";
-                break;
-            case 3://D
-                ans.text += "D";
-                break;
-            case 4://E
-                ans.text += "E";
-                break;
-            case 5://F
-                ans.text += "F";
-                break;
-            case 6://G
-                ans.text += "G";
-                break;
-            case 7://H
-                ans.text += "H";
-                break;
-            case 8://I
-                ans.text += "I";
-                break;
-            case 9://J
-                ans.text += "J";
-                break;
-            case 10://K
-                ans.text += "K";
-                break;
-            case 11://L
-                ans.text += "L";
-                break;
-            case 12://M
-                ans.text += "M";
-                break;
-            case 13://N
-                ans.text += "N";
-                break;
-            case 14://O
-                ans.text += "O";
-                break;
-            case 15://P
-                ans.text += "P";
-                break;
-            case 16://Q
-                ans.text += "Q";
-                break;
-            case 17://R
-                ans.text += "R";
-                break;
-            case 18://S
-                ans.text += "S";
-                break;
-            case 19://T
-                ans.text += "T";
-                break;
-            case 20://U
-                ans.text += "U";
-                break;
-            case 21://V
-                ans.text += "V";
-                break;
-            case 22://W
-                ans.text += "W";
-                break;
-            case 23://X
-                ans.text += "X";
-                break;
-            case 24://Y
-                ans.text += "Y";
-                break;
-            case 25://Z
-                ans.text += "Z";
-                break;
-            case 26://1
-                ans.text += "1";
-                break;
-            case 27://2
-                ans.text += "2";
-                break;
-            case 28://3
-                ans.text += "3";
-                break;
-            case 29://4
-                ans.text += "4";
-                break;
-            case 30://5
-                ans.text += "5";
-                break;
-            case 31://6
-                ans.text += "6";
-                break;
-            case 32://7
-                ans.text += "7";
-                break;
-            case 33://8
-                ans.text += "8";
-                break;
-            case 34://9
-                ans.text += "9";
-                break;
-            case 35://0
-                ans.text += "0";
-                break;
-            case 36://-
-                ans.text += "-";
-                break;
-            case 37://[
-                ans.text += "[";
-                break;
-            case 38://]
-                ans.text += "]";
-                break;
-            case 39://'
-                ans.text += "'";
-                break;
-            case 40://.
-                ans.text += ".";
-                break;
-            case 41://!
-                ans.text += "!";
-                break;
-            case 42://?
-                ans.text += "?";
-                break;
-            case 43://&
-                ans.text += "&";
-                break;
-            case 44://^
-                ans.text += "^";
-                break;
-            case 45://SPACE
-                ans.text += " ";
-                break;
-            case 46://,
-                ans.text += ",";
-                break;
-        }
+        newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, button.transform);
+        button.AddInteractionPunch(.5f);
+        if (moduleSolved)
+            return;
+        ans.text += button.GetComponentInChildren<TextMesh>().text;
     }
 
-    void handleSubmit()
+    void PressSubmit()
     {
         newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, submit.transform);
-        if (!lightsOn || moduleSolved)
+        if (moduleSolved)
             return;
         if (ans.text.ToUpper().Equals(answer.ToUpper()))
         {
@@ -254,10 +86,11 @@ public class insanagrams : MonoBehaviour
         }
     }
 
-    void handleClear()
+    void PressClear()
     {
         newAudio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, submit.transform);
-        if (!lightsOn || moduleSolved) return;
+        if (moduleSolved)
+            return;
         Debug.LogFormat("[Insanagrams #{0}] Clear pressed. Text cleared: '{1}'.", moduleId, ans.text);
         ans.text = "";
     }
@@ -313,7 +146,7 @@ public class insanagrams : MonoBehaviour
         keys.Add(',', 46);
 
 
-        moduleNames = new String[] { "101 Dalmatians", "3D Maze", "3D Tunnels", "Accumulation", "Adjacent Letters", "Adventure Game", "Air Traffic Controller", "Alchemy", "Algebra", "Alphabetical Order", "Alphabet Numbers", "Alphabet", "Anagrams", "Answering Questions", "Astrology", "Backgrounds", "Bartending", "Bases", "Battleship", "Benedict Cumberbatch", "Big Circle", "Binary LEDs", "Binary Puzzle", "Binary Tree", "Bitmaps", "Bitwise Operations", "Black Hole", "Blackjack", "Blind Alley", "Blind Maze", "Blockbusters", "Blue Cipher", "Boggle", "Boolean Maze", "Boolean Venn Diagram", "Braille", "British Slang", "Broken Buttons", "Broken Guitar Chords", "Burglar Alarm", "Button Masher", "Button Sequence", "Caesar Cipher", "Calendar", "Capacitor Discharge", "Catchphrase", "Challenge & Contact", "Character Shift", "Chinese Counting", "Cheap Checkout", "Chess", "Chord Qualities", "Christmas Presents", "Coffeebucks", "Color Addition", "Color Decoding", "Colored Squares", "Colored Switches", "Color Flash", "Colorful Insanity", "Colorful Madness", "Color Generator", "Color Match", "Color Math", "Color Morse", "Combination Lock", "Command Prompt", "Complex Keypad", "Complicated Buttons", "Complicated Wires", "Connection Check", "Connection Device", "Cookie Jars", "Cooking", "Coordinates", "Countdown", "Crackbox", "Crazy Talk", "Creation", "Cruel Countdown", "Cruel Piano Keys", "Cryptography", "Curriculum", "Cursed Double-Oh", "Decolored Squares", "Determinants", "DetoNATO", "Digital Cipher", "Digital Root", "Discolored Squares", "Divided Squares", "Dominoes", "Double-Oh", "Double Color", "Dr. Doctor", "Dragon Energy", "Edgework", "Elder Futhark", "Emoji Math", "Encrypted Morse", "Encryption Bingo", "English Test", "Equations", "Error Codes", "European Travel", "Extended Password", "Factoring", "Factory Maze", "Fast Math", "Faulty Backgrounds", "Festive Piano Keys", "Filibuster", "FizzBuzz", "Flags", "Flashing Lights", "Flavor Text EX", "Flavor Text", "Flip The Coin", "Follow the Leader", "Font Select", "Foreign Exchange Rates", "Forget Everything", "Forget Me Not", "Forget This", "Free Parking", "Friendship", "Functions", "Gadgetron Vendor", "Game of Life Cruel", "Game of Life Simple", "Geometry Dash", "Genetic Sequence", "Graffiti Numbers", "Greek Calculus", "Green Cipher", "Gridlock", "Grid Matching", "Guitar Chords", "Harmony Sequence", "Hexamaze", "Hex To Decimal", "Hieroglyphics", "Hogwarts", "Homophones", "Horrible Memory", "Hot Potato", "HTTP Response", "Human Resources", "Hunting", "Ice Cream", "Identity Parade", "IKEA", "Indigo Cipher", "Insanagrams", "Instructions", "Keypad", "Knob", "Know Your Way", "Krazy Talk", "Kudosudoku", "Lasers", "Laundry", "LED Encryption", "LED Grid", "LED Math", "Left And Right", "LEGO", "Letter Keys", "Light Cycle", "Lights Out", "Lightspeed", "Lion's Share", "Listening", "Logical Buttons", "Logic Gates", "Logic", "Mad Memory", "Mafia", "Mahjong", "Maintenance", "Manometers", "Marble Tumble", "Maritime Flags", "Mashematics", "Mastermind Cruel", "Mastermind Simple", "Math", "Maze Scrambler", "Maze", "Melody Sequencer", "Memory", "Micro-Modules", "Microcontroller", "Mineseeker", "Minesweeper", "Modern Cipher", "Module Homework", "Module Maze", "Modules Against Humanity", "Modulo", "Monsplode, Fight!", "Monsplode Trading Cards", "Morse-A-Maze", "Morse Code", "Morse Identification", "Morsematics", "Morse War", "Mortal Kombat", "Motion Sense", "Mouse In The Maze", "Murder", "Mystic Square", "Needy Mrs Bob", "Neutralization", "Nonogram", "Number Nimbleness", "Number Pad", "Numbers", "Only Connect", "Orientation Cube", "Painting", "Party Time", "Passport Control", "Password", "Pattern Cube", "Pay Respects", "Periodic Table", "Perplexing Wires", "Perspective Pegs", "Piano Keys", "Pie", "Pigpen Rotations", "Playfair Cipher", "Plumbing", "Poetry", "Point of Order", "Poker", "Polyhedral Maze", "Press X", "Probing", "QR Code", "Question Mark", "Quintuples", "Radiator", "Random Number Generator", "Rapid Buttons", "Refill that Beer!", "Regular Crazy Talk", "Resistors", "Retirement", "Reverse Morse", "Rhythms", "Rock-Paper-Scissors-Lizard-Spock", "Rotary Phone", "Round Keypad", "Rubik's Clock", "Rubik's Cube", "S.E.T.", "Safety Safe", "Schlag den Bomb", "Scripting", "Sea Shells", "Semaphore", "Shape Memory", "Shapes And Bombs", "Shape Shift", "Shikaku", "Signals", "Silly Slots", "Simon's Sequence", "Simon's Stages", "Simon's Star", "Simon Samples", "Simon Says", "Simon Scrambles", "Simon Screams", "Simon Sends", "Simon Shrieks", "Simon Sings", "Simon Sounds", "Simon Speaks", "Simon Spins", "Simon Squawks", "Simon States", "Sink", "Skewed Slots", "Skinny Wires", "Skyrim", "Snooker", "Sonic & Knuckles", "Sonic the Hedgehog", "Souvenir", "Spinning Buttons", "Splitting The Loot", "Square Button", "Street Fighter", "Subways", "Sueet Wall", "Superlogic", "Switches", "Symbol Cycle", "Symbolic Coordinates", "Symbolic Password", "SYNC-125 [3]", "Synchronization", "Synonyms", "T-Words", "Tangrams", "Tap Code", "Tasha Squeals", "Tax Returns", "Ten-Button Color Code", "Tennis", "Ternary Converter", "Tetris", "Text Field", "The Bulb", "The Button", "The Clock", "The Code", "The Crystal Maze", "The Cube", "The Digit", "The Festive Jukebox", "The Fidget Spinner", "The Gamepad", "The Hangover", "The Hexabutton", "The iPhone", "The Jack-O'-Lantern", "The Jewel Vault", "The Jukebox", "The Labyrinth", "The London Underground", "The Moon", "The Number Cipher", "The Number", "The Plunger Button", "The Plunger", "The Radio", "The Screw", "The Sphere", "The Stock Market", "The Stopwatch", "The Sun", "The Swan", "The Switch", "The Time Keeper", "The Triangle", "The Wire", "Third Base", "Tic-Tac-Toe", "Timezone", "Tower of Hanoi", "Turn The Keys", "Turn The Key", "Turtle Robot", "Two Bits", "Ultrastores", "Uncolored Squares", "Unfair Cipher", "Unrelated Anagrams", "USA Maze", "Valves", "Varicolored Squares", "Venting Gas", "Violet Cipher", "Visual Impairment", "Waste Management", "Web Design", "Westeros", "Who's on First", "Who's That Monsplode", "Wingdings", "Wire Placement", "Wire Sequence", "Wire Spaghetti", "Wires", "Word Scramble", "Word Search", "X-Ray", "X01", "Yahtzee", "Zoni", "Zoo", "Subscribe to Pewdiepie", "Grocery Store", "Draw", "Burger Alarm", "Purgatory", "Mega Man 2", "Lombax Cubes", "The Stare", "Graphic Memory", "Quiz Buzz", "Wavetapping", "The Hypercube", "Speak English", "Stack'em", "Seven Wires", "Colored Keys", "The Troll", "Planets", "The Necronomicon", "Four-Card Monte", "Aa", "The Witness", "The Giant's Drink", "Digit String", "Alpha", "Snap!", "Hidden Colors", "Colour Code", "Vexillology", "Brush Strokes", "Odd One Out", "The Triangle Button", "Mazematics", "Equations X", "Maze^3", "Yellow Cipher", "Orange Cipher", "Red Cipher", "Faulty RGB Maze", "Forget Me Later", "Garfield Kart", "Footnotes", "Bamboozling Button", "Fruits", "The Modkit", "Tetravex", "Flower Patch", "Matchematics", "Caesar Cycle", "Playfair Cycle", "Cryptic Cycle", "Ultimate Cycle", "Bamboozling Button Grid", "Old Fogey", "The Ultracube", "Snakes and Ladders", "Module Movements", "Roman Numerals", "Red Buttons", "The Rule", "Lousy Chess", "Keypad Lock", "Eight Pages", "The Colored Maze", "White Cipher", "Gray Cipher", "Black Cipher", "The Hyperlink", "Corners", "The High Score",
+        moduleNames = new String[] { "101 Dalmatians", "3D Maze", "3D Tunnels", "Accumulation", "Adjacent Letters", "Adventure Game", "Air Traffic Controller", "Alchemy", "Algebra", "Alphabetical Order", "Alphabet Numbers", "Alphabet", "Anagrams", "Answering Questions", "Astrology", "Backgrounds", "Bartending", "Bases", "Battleship", "Benedict Cumberbatch", "Big Circle", "Binary LEDs", "Binary Puzzle", "Binary Tree", "Bitmaps", "Bitwise Operations", "Black Hole", "Blackjack", "Blind Alley", "Blind Maze", "Blockbusters", "Blue Cipher", "Boggle", "Boolean Maze", "Boolean Venn Diagram", "Braille", "British Slang", "Broken Buttons", "Broken Guitar Chords", "Burglar Alarm", "Button Masher", "Button Sequence", "Caesar Cipher", "Calendar", "Capacitor Discharge", "Catchphrase", "Challenge & Contact", "Character Shift", "Chinese Counting", "Cheap Checkout", "Chess", "Chord Qualities", "Christmas Presents", "Coffeebucks", "Color Addition", "Color Decoding", "Colored Squares", "Colored Switches", "Color Flash", "Colorful Insanity", "Colorful Madness", "Color Generator", "Color Match", "Color Math", "Color Morse", "Combination Lock", "Command Prompt", "Complex Keypad", "Complicated Buttons", "Complicated Wires", "Connection Check", "Connection Device", "Cookie Jars", "Cooking", "Coordinates", "Countdown", "Crackbox", "Crazy Talk", "Creation", "Cruel Countdown", "Cruel Piano Keys", "Cryptography", "Curriculum", "Cursed Double-Oh", "Decolored Squares", "Determinants", "DetoNATO", "Digital Cipher", "Digital Root", "Discolored Squares", "Divided Squares", "Dominoes", "Double-Oh", "Double Color", "Dr. Doctor", "Dragon Energy", "Edgework", "Elder Futhark", "Emoji Math", "Encrypted Morse", "Encryption Bingo", "English Test", "Equations", "Error Codes", "European Travel", "Extended Password", "Factoring", "Factory Maze", "Fast Math", "Faulty Backgrounds", "Festive Piano Keys", "Filibuster", "FizzBuzz", "Flags", "Flashing Lights", "Flavor Text EX", "Flavor Text", "Flip The Coin", "Follow the Leader", "Font Select", "Foreign Exchange Rates", "Forget Everything", "Forget Me Not", "Forget This", "Free Parking", "Friendship", "Functions", "Gadgetron Vendor", "Game of Life Cruel", "Game of Life Simple", "Geometry Dash", "Genetic Sequence", "Graffiti Numbers", "Greek Calculus", "Green Cipher", "Gridlock", "Grid Matching", "Guitar Chords", "Harmony Sequence", "Hexamaze", "Hex To Decimal", "Hieroglyphics", "Hogwarts", "Homophones", "Horrible Memory", "Hot Potato", "HTTP Response", "Human Resources", "Hunting", "Ice Cream", "Identity Parade", "IKEA", "Indigo Cipher", "Insanagrams", "Instructions", "Keypad", "Knob", "Know Your Way", "Krazy Talk", "Kudosudoku", "Lasers", "Laundry", "LED Encryption", "LED Grid", "LED Math", "Left And Right", "LEGO", "Letter Keys", "Light Cycle", "Lights Out", "Lightspeed", "Lion's Share", "Listening", "Logical Buttons", "Logic Gates", "Logic", "Mad Memory", "Mafia", "Mahjong", "Maintenance", "Manometers", "Marble Tumble", "Maritime Flags", "Mashematics", "Mastermind Cruel", "Mastermind Simple", "Math", "Maze Scrambler", "Maze", "Melody Sequencer", "Memory", "Micro-Modules", "Microcontroller", "Mineseeker", "Minesweeper", "Modern Cipher", "Module Homework", "Module Maze", "Modules Against Humanity", "Modulo", "Monsplode, Fight!", "Monsplode Trading Cards", "Morse-A-Maze", "Morse Code", "Morse Identification", "Morsematics", "Morse War", "Mortal Kombat", "Motion Sense", "Mouse In The Maze", "Murder", "Mystic Square", "Needy Mrs Bob", "Neutralization", "Nonogram", "Number Nimbleness", "Number Pad", "Numbers", "Only Connect", "Orientation Cube", "Painting", "Party Time", "Passport Control", "Password", "Pattern Cube", "Pay Respects", "Periodic Table", "Perplexing Wires", "Perspective Pegs", "Piano Keys", "Pie", "Pigpen Rotations", "Playfair Cipher", "Plumbing", "Poetry", "Point of Order", "Poker", "Polyhedral Maze", "Press X", "Probing", "QR Code", "Question Mark", "Quintuples", "Radiator", "Random Number Generator", "Rapid Buttons", "Refill that Beer!", "Regular Crazy Talk", "Resistors", "Retirement", "Reverse Morse", "Rhythms", "Rock-Paper-Scissors-Lizard-Spock", "Rotary Phone", "Round Keypad", "Rubik's Clock", "Rubik's Cube", "S.E.T.", "Safety Safe", "Schlag den Bomb", "Scripting", "Sea Shells", "Semaphore", "Shape Memory", "Shapes And Bombs", "Shape Shift", "Shikaku", "Signals", "Silly Slots", "Simon's Sequence", "Simon's Stages", "Simon's Star", "Simon Samples", "Simon Says", "Simon Scrambles", "Simon Screams", "Simon Sends", "Simon Shrieks", "Simon Sings", "Simon Sounds", "Simon Speaks", "Simon Spins", "Simon Squawks", "Simon States", "Sink", "Skewed Slots", "Skinny Wires", "Skyrim", "Snooker", "Sonic & Knuckles", "Sonic the Hedgehog", "Souvenir", "Spinning Buttons", "Splitting The Loot", "Square Button", "Street Fighter", "Subways", "Sueet Wall", "Superlogic", "Switches", "Symbol Cycle", "Symbolic Coordinates", "Symbolic Password", "SYNC-125 [3]", "Synchronization", "Synonyms", "T-Words", "Tangrams", "Tap Code", "Tasha Squeals", "Tax Returns", "Ten-Button Color Code", "Tennis", "Ternary Converter", "Tetris", "Text Field", "The Bulb", "The Button", "The Clock", "The Code", "The Crystal Maze", "The Cube", "The Digit", "The Festive Jukebox", "The Fidget Spinner", "The Gamepad", "The Hangover", "The Hexabutton", "The iPhone", "The Jack-O'-Lantern", "The Jewel Vault", "The Jukebox", "The Labyrinth", "The London Underground", "The Moon", "The Number Cipher", "The Number", "The Plunger Button", "The Plunger", "The Radio", "The Screw", "The Sphere", "The Stock Market", "The Stopwatch", "The Sun", "The Swan", "The Switch", "The Time Keeper", "The Triangle", "The Wire", "Third Base", "Tic Tac Toe", "Timezone", "Tower of Hanoi", "Turn The Keys", "Turn The Key", "Turtle Robot", "Two Bits", "Ultrastores", "Uncolored Squares", "Unfair Cipher", "Unrelated Anagrams", "USA Maze", "Valves", "Varicolored Squares", "Venting Gas", "Violet Cipher", "Visual Impairment", "Waste Management", "Web Design", "Westeros", "Who's on First", "Who's That Monsplode", "Wingdings", "Wire Placement", "Wire Sequence", "Wire Spaghetti", "Wires", "Word Scramble", "Word Search", "X-Ray", "X01", "Yahtzee", "Zoni", "Zoo", "Subscribe to Pewdiepie", "Grocery Store", "Draw", "Burger Alarm", "Purgatory", "Mega Man 2", "Lombax Cubes", "The Stare", "Graphic Memory", "Quiz Buzz", "Wavetapping", "The Hypercube", "Speak English", "Stack'em", "Seven Wires", "Colored Keys", "The Troll", "Planets", "The Necronomicon", "Four-Card Monte", "Aa", "The Witness", "The Giant's Drink", "Digit String", "Alpha", "Snap!", "Hidden Colors", "Colour Code", "Vexillology", "Brush Strokes", "Odd One Out", "The Triangle Button", "Mazematics", "Equations X", "Maze^3", "Yellow Cipher", "Orange Cipher", "Red Cipher", "Faulty RGB Maze", "Forget Me Later", "Garfield Kart", "Footnotes", "Bamboozling Button", "Fruits", "The Modkit", "Tetravex", "Flower Patch", "Matchematics", "Caesar Cycle", "Playfair Cycle", "Cryptic Cycle", "Ultimate Cycle", "Bamboozling Button Grid", "Old Fogey", "The Ultracube", "Snakes and Ladders", "Module Movements", "Roman Numerals", "Red Buttons", "The Rule", "Lousy Chess", "Keypad Lock", "Eight Pages", "The Colored Maze", "White Cipher", "Gray Cipher", "Black Cipher", "The Hyperlink", "Corners", "The High Score",
          "Ingredients", "Intervals", "Cheep Checkout", "Spelling Bee", "Thinking Wires", "Seven Choose Four", "Object Shows", "Lunchtime", "Natures", "Neutrinos", "Scavenger Hunt", "Polygons", "Codenames", "Odd Mod Out", "Blinkstop", "Forget It Not", "Rainbow Arrows", "Passcodes", "Digital Dials", "Lines of Code", "Encrypted Dice", "Colorful Dials", "Atbash Cipher", "Addition", "Reversed Edgework", "Matrices", "Cruel Keypads", "The Black Page", "Simon Forgets", "Greek Letter Grid", "Going Backwards", "Scalar Dials", "Keywords", "Book of Mario", "The Crafting Table" };
 
         modules.Add("101 Dalmatians", "101 Natal Maids");
@@ -667,7 +500,7 @@ public class insanagrams : MonoBehaviour
         modules.Add("The Triangle", "Hanger Title");
         modules.Add("The Wire", "Were Hit");
         modules.Add("Third Base", "Bead Shirt");
-        modules.Add("Tic-Tac-Toe", "Cat-Cot-Tie");
+        modules.Add("Tic Tac Toe", "Cat Cot Tie");
         modules.Add("Timezone", "Monetize");
         modules.Add("Tower of Hanoi", "Antihero Woof");
         modules.Add("Turn The Keys", "Try Hut Knees");
@@ -701,8 +534,8 @@ public class insanagrams : MonoBehaviour
         modules.Add("Yahtzee", "Hey Zeta");
         modules.Add("Zoni", "I No Z");
         modules.Add("Zoo", "Ooz");
-        modules.Add("Subscribe to Pewdiepie", "I Purities Deep Cobwebs"); //save
-        modules.Add("Grocery Store", "Retry Scrooge"); //save
+        modules.Add("Subscribe to Pewdiepie", "I Purities Deep Cobwebs");
+        modules.Add("Grocery Store", "Retry Scrooge");
         modules.Add("Draw", "Ward");
         modules.Add("Burger Alarm", "Larger Umbra");
         modules.Add("Purgatory", "Yogurt Rap");
@@ -812,9 +645,9 @@ public class insanagrams : MonoBehaviour
     }
 
     // Twitch Plays
-#pragma warning disable 414
+    #pragma warning disable 414
     private string TwitchHelpMessage = "Use '!{0} submit Cheap Checkout' to submit Cheap Checkout as your answer.";
-#pragma warning restore 414
+    #pragma warning restore 414
 
     KMSelectable[] ProcessTwitchCommand(string input)
     {
