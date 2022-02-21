@@ -23,15 +23,12 @@ public class insanagrams : MonoBehaviour
     public TextMesh ana, ans;
 
     [SerializeField]
-#pragma warning disable IDE0044
     private string _anagramsUrl;
-#pragma warning restore IDE0044
 
     private bool _hasRemoteError;
 
     private String answer;
 
-    private Dictionary<string, string> modules = new Dictionary<string, string>();
     private Dictionary<char, int> keys = new Dictionary<char, int>();
     private String[] moduleNames;
 
@@ -80,7 +77,7 @@ public class insanagrams : MonoBehaviour
         Debug.LogFormat("[Insanagrams #{0}] Anagram: \"{1}\", Answer: \"{2}\"", moduleId, pair[1], answer);
 
         foreach (char letter in answer.ToUpper().ToCharArray())
-            buttonObjects[keys[letter]].SetActive(true);
+            buttonObjects[keys[letter]].SetActive(true); // te
     }
 
 	void PressButton(KMSelectable button)

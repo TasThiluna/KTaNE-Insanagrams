@@ -13,11 +13,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: insanagrams
   title: Insanagrams
-  author: AAces, Blananas2
+  author: TasThing
   description: "Unscramble a module name!\r\nThis is the version currently being maintained.
     Please unsubscribe from the old version.\r\nOld version: https://steamcommunity.com/sharedfiles/filedetails/?id=1814137329\r\n\r\nIdea:
-    Blananas2\r\nImplementation: AAces\r\nMaintained by: TasThing\r\n\r\nManual HTML:
-    https://ktane.timwi.de/HTML/Insanagrams.html\r\nManual PDF: https://ktane.timwi.de/PDF/Insanagrams.pdf"
-  version: 1.0
+    Blananas2\r\nImplementation: AAces\r\nWeb feature: TheDarkSid3r\nMaintained by:
+    TasThing\r\n\r\nManual HTML: https://ktane.timwi.de/HTML/Insanagrams.html\r\nManual
+    PDF: https://ktane.timwi.de/PDF/Insanagrams.pdf"
+  version: 1.1
   outputFolder: build
   previewImage: {fileID: 2800000, guid: 5e38889d8faeb8f42971a9b4d6366b74, type: 3}
